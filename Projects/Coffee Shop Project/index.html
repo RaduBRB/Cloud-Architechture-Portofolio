@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Cloud – Order Your Coffee</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f3ee;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #4b2e2b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        label {
+            font-weight: bold;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background: #4b2e2b;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #6a3f3b;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Coffee Cloud ☕</h1>
+    <p>Your favourite coffee, delivered with serverless magic</p>
+</header>
+
+<div class="container">
+    <h2>Order Your Coffee</h2>
+
+    <label for="name">Full Name</label>
+    <input type="text" id="name" placeholder="John Doe">
+
+    <label for="email">Email Address</label>
+    <input type="email" id="email" placeholder="john@example.com">
+
+    <label for="coffee">Choose Your Coffee</label>
+    <select id="coffee">
+        <option value="espresso">Espresso</option>
+        <option value="latte">Latte</option>
+        <option value="cappuccino">Cappuccino</option>
+        <option value="americano">Americano</option>
+        <option value="mocha">Mocha</option>
+    </select>
+
+    <button onclick="submitOrder()">Place Order</button>
+
+    <p id="message"></p>
+</div>
+
+<script>
+    async function submitOrder() {
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const coffee = document.getElementById("coffee").value;
+
+        const messageBox = document.getElementById("message");
+        messageBox.textContent = "";
+
+        if (!name || !email) {
+            messageBox.textContent = "Please enter your name and email.";
+            messageBox.className = "error";
+            return;
+        }
+
+        try {
+            const response = await fetch("YOUR_API_GATEWAY_URL_HERE", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, coffee })
+            });
+
+            if (response.ok) {
+                messageBox.textContent = "Order received! Check your email for the payment link.";
+                messageBox.className = "success";
+            } else {
+                messageBox.textContent = "Something went wrong. Please try again.";
+                messageBox.className = "error";
+            }
+        } catch (err) {
+            messageBox.textContent = "Network error. Please try again.";
+            messageBox.className = "error";
+        }
+    }
+</script>
+
+</body>
+</html>
