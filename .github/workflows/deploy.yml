@@ -16,31 +16,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ✅ 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # ✅ 2. Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to ECR
+      # ✅ 3. Login to ECR
+      - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
+      # ✅ 4. Set dynamic image tag (VERY IMPORTANT)
+      - name: Set image tag
+        run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+
+      # ✅ 5. Build Docker image
       - name: Build Docker image
         run: docker build -t app ./Projects/Automation/app
 
-      - name: Tag image
+      # ✅ 6. Tag Docker image
+      - name: Tag Docker image
         run: |
           docker tag app:latest \
-          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}
 
-      - name: Push image
+      # ✅ 7. Push image to ECR
+      - name: Push Docker image
         run: |
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}
 
+      # ✅ 8. Force ECS deployment
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
