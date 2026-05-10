@@ -53,19 +53,14 @@ jobs:
       # ✅ 7. Tag Docker image (IMPORTANT: SHA + latest ✅)
       - name: Tag Docker image
         run: |
-          docker tag app:latest \
           docker tag app:latest ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}
-
-          docker tag app:latest \
           docker tag app:latest ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+
 
       # ✅ 8. Push Docker image (push BOTH tags ✅)
       - name: Push Docker image
         run: |
-          docker push \
           docker push ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}
-
-          docker push \
           docker push ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
 
       # ✅ 9. Force ECS deployment
