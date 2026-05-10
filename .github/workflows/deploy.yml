@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+
+permissions:
+  id-token: write   # REQUIRED for OIDC
+  contents: read    # REQUIRED for checkout
+
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: procode-ecr-repository
