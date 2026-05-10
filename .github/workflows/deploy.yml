@@ -6,8 +6,8 @@ on:
       - main
 
 permissions:
-  id-token: write     # ✅ Required for OIDC
-  contents: read      # ✅ Required for checkout
+  id-token: write      # ✅ Required for OIDC
+  contents: read       # ✅ Required for checkout
 
 env:
   AWS_REGION: us-east-1
@@ -29,36 +29,44 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::362649471889:role/GitHubActionsRole
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
       # ✅ 3. Get AWS Account ID dynamically
       - name: Get AWS account ID
         run: |
           echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_ENV
 
-      # ✅ 4. Login to ECR
+      # ✅ 4. Login to Amazon ECR
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
       # ✅ 5. Set image tag (commit SHA)
       - name: Set image tag
-        run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+        run: |
+          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
 
       # ✅ 6. Build Docker image
       - name: Build Docker image
-        run: docker build -t app ./Projects/Automation/app
+        run: |
+          docker build -t app ./Projects/Automation/app
 
-      # ✅ 7. Tag Docker image (IMPORTANT ✅)
+      # ✅ 7. Tag Docker image (IMPORTANT: SHA + latest ✅)
       - name: Tag Docker image
         run: |
           docker tag app:latest \
-          ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}
+          docker tag app:latest ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}
 
-      # ✅ 8. Push Docker image
+          docker tag app:latest \
+          docker tag app:latest ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+
+      # ✅ 8. Push Docker image (push BOTH tags ✅)
       - name: Push Docker image
         run: |
           docker push \
-          ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}
+          docker push ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}
+
+          docker push \
+          docker push ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
 
       # ✅ 9. Force ECS deployment
       - name: Deploy to ECS
