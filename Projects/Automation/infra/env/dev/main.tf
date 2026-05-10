@@ -25,23 +25,22 @@ module "ecs" {
   target_group_arn = module.alb.target_group_arn
   listener_arn     = module.alb.listener_arn
 
-  image_url = "991150654740.dkr.ecr.us-east-1.amazonaws.com/procode-ecr-repository:latest"
+  image_url = "${var.account_id}.dkr.ecr.us-east-1.amazonaws.com/procode-ecr-repository:latest"
 }
 
 module "vpc" {
   source = "../../modules/vpc"
 
-  vpc_cidr = "10.0.0.0/16"
+  vpc_cidr = var.vpc_cidr
 
-  azs = ["us-east-1a", "us-east-1b"]
+  azs = var.azs
 
-  public_subnets = [
-    "10.0.1.0/24",
-    "10.0.2.0/24"
-  ]
+  public_subnets = var.public_subnets
 
-  private_subnets = [
-    "10.0.3.0/24",
-    "10.0.4.0/24"
-  ]
+  private_subnets = var.private_subnets
+}
+
+module "iam" {
+  source = "../../modules/iam"
+
 }
