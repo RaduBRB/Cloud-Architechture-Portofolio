@@ -19,7 +19,7 @@ module "ecs" {
 
   vpc_id = module.vpc.vpc_id
 
-  subnets = module.vpc.public_subnets
+  subnets = module.vpc.private_subnets
 
   alb_sg_id        = module.alb.alb_security_group_id
   target_group_arn = module.alb.target_group_arn
